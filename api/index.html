@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isekai RPG: Karanlık Dünya</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: #d4b896; 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+        #game { 
+            width: 100%; 
+            max-width: 600px; 
+            height: 90vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        #output { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            border: 2px solid #333; 
+            background: #111; 
+            margin-bottom: 70px; 
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.1);
+        }
+        .msg { margin-bottom: 15px; padding: 12px; border-radius: 8px; line-height: 1.6; font-size: 15px; }
+        .user { border-left: 4px solid #4a90d9; background: #161b22; color: #fff; }
+        .bot { border-left: 4px solid #ff6b35; background: #1c1610; color: #d4b896; }
+        .controls { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 20px; 
+            right: 20px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            display: flex; 
+            gap: 10px; 
+        }
+        input { 
+            flex: 1; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #ff6b35; 
+            background: #000; 
+            color: #fff; 
+            outline: none;
+        }
+        button { 
+            padding: 15px 25px; 
+            border-radius: 8px; 
+            border: none; 
+            background: #ff6b35; 
+            color: #000; 
+            font-weight: bold; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #e05a2b; }
+        h2 { text-align: center; color: #ff6b35; letter-spacing: 2px; text-shadow: 2px 2px #000; }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h2>⚔️ KARANLIK DÜNYA</h2>
+        <div id="output">
+            <div class="msg bot"><b>Ruh:</b> Gözlerini aç fani... Burası senin bildiğin dünyaya benzemez. Kaderin senin elinde. Ne yapmak istersin?</div>
+        </div>
+        <div class="controls">
+            <input type="text" id="userInput" placeholder="Kaderini yaz..." onkeypress="if(event.key==='Enter') oyna()">
+            <button onclick="oyna()">GÖNDER</button>
+        </div>
+    </div>
+
+    <script>
+        async function oyna() {
+            const input = document.getElementById('userInput');
+            const out = document.getElementById('output');
+            const text = input.value.trim();
+            
+            if(!text) return;
+
+            out.innerHTML += `<div class="msg user"><b>Sen:</b> ${text}</div>`;
+            input.value = '';
+            out.scrollTop = out.scrollHeight;
+
+            try {
+                const res = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ prompt: text })
+                });
+                const data = await res.json();
+                out.innerHTML += `<div class="msg bot"><b>Ruh:</b> ${data.text}</div>`;
+            } catch (e) {
+                out.innerHTML += `<div class="msg"><i>Büyü bozuldu, bağlantı koptu...</i></div>`;
+            }
+            out.scrollTop = out.scrollHeight;
+        }
+    </script>
+</body>
+</html>
